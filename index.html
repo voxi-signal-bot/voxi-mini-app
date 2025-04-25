@@ -201,12 +201,12 @@ background-size: cover;
   <div class="main-content">
     <img src="https://i.imgur.com/FGOM86x.png" alt="Lucky Jet Rocket" class="rocket">
     <div class="circle">
-      <p id="circle-text">CLICK ON <br> <span>"GET SIGNAL"</span></p>
+      <p id="circle-text">CLICK ON <br> <span>"OBTER SINAL"</span></p>
     </div>
   </div>
 
   <div class="button-container">
-    <button id="signal-button" class="signal-button" onclick="sendSignal()">GET SIGNAL</button>
+    <button id="signal-button" class="signal-button" onclick="sendSignal()">OBTER SINAL</button>
   </div>
 
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
@@ -230,13 +230,13 @@ background-size: cover;
 
       const timer = setInterval(() => {
         timeLeft--;
-        signalButton.textContent = `WAIT (${timeLeft}s)`;
+        signalButton.textContent = `AGUARDE (${timeLeft}s)`;
 
         if (timeLeft <= 0) {
           clearInterval(timer);
           signalButton.disabled = false;
-          signalButton.textContent = 'GET SIGNAL';
-          circleText.innerHTML = 'CLICK ON <br> <span>"GET SIGNAL"</span>';
+          signalButton.textContent = 'OBTER SINAL';
+          circleText.innerHTML = 'CLICK ON <br> <span>"OBTER SINAL"</span>';
         }
       }, 1000);
     }
