@@ -3,71 +3,19 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>VOXI SIGNAL - LUCKY JET</title>
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <script src="https://cdn.tailwindcss.com"></script>
+  <title>Lucky Jet</title>
+  <style>
+    body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
+    button { padding: 10px 20px; font-size: 16px; background-color: #4CAF50; color: white; border: none; cursor: pointer; }
+    button:hover { background-color: #45a049; }
+  </style>
 </head>
 <body>
-  <div id="root"></div>
-  <script src="https://cdn.jsdelivr.net/npm/react@18.2.0/umd/react.production.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/react-dom@18.2.0/umd/react-dom.production.min.js"></script>
-  <script src="https://cdn.jsdelivr.net/npm/babel-standalone@7.22.10/babel.min.js"></script>
-  <script type="text/babel">
-    const { useState, useEffect } = React;
-
-    function App() {
-      const [signal, setSignal] = useState('CLICK ON "GET SIGNAL"');
-      const [cooldown, setCooldown] = useState(0);
-      const [isButtonDisabled, setIsButtonDisabled] = useState(false);
-
-      useEffect(() => {
-        if (window.Telegram.WebApp) {
-          window.Telegram.WebApp.ready();
-          const user = window.Telegram.WebApp.initDataUnsafe.user;
-          if (!user) {
-            alert('Unauthorized');
-          }
-        }
-      }, []);
-
-      useEffect(() => {
-        if (cooldown > 0) {
-          const timer = setInterval(() => {
-            setCooldown((prev) => prev - 1);
-          }, 1000);
-          return () => clearInterval(timer);
-        } else {
-          setIsButtonDisabled(false);
-        }
-      }, [cooldown]);
-
-      const generateSignal = () => {
-        const value = (Math.random() * (50.0 - 0.8) + 0.8).toFixed(1);
-        setSignal(value);
-        setCooldown(60);
-        setIsButtonDisabled(true);
-      };
-
-      return (
-        <div className="flex flex-col items-center justify-center h-screen bg-gray-900 text-white">
-          <h1 className="text-4xl font-bold mb-8">LUCKY JET</h1>
-          <div className="w-64 h-64 rounded-full bg-blue-600 flex items-center justify-center text-center text-xl font-semibold">
-            {signal}
-          </div>
-          <button
-            className={`mt-8 px-6 py-3 rounded-lg text-lg font-semibold ${
-              isButtonDisabled ? 'bg-gray-500 cursor-not-allowed' : 'bg-green-500 hover:bg-green-600'
-            }`}
-            onClick={generateSignal}
-            disabled={isButtonDisabled}
-          >
-            {isButtonDisabled ? `WAIT ${cooldown}s` : 'GET SIGNAL'}
-          </button>
-        </div>
-      );
-    }
-
-    ReactDOM.render(<App />, document.getElementById('root'));
+  <h1>LUCKY JET</h1>
+  <button onclick="window.Telegram.WebApp.sendData('signal')">GET SIGNAL</button>
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <script>
+    window.Telegram.WebApp.ready();
   </script>
 </body>
 </html>
