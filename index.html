@@ -3,19 +3,157 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Lucky Jet</title>
+  <title>Lucky Jet Mini App</title>
   <style>
-    body { font-family: Arial, sans-serif; text-align: center; padding: 20px; }
-    button { padding: 10px 20px; font-size: 16px; background-color: #4CAF50; color: white; border: none; cursor: pointer; }
-    button:hover { background-color: #45a049; }
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: #6B4CAF; /* Фиолетовый фон */
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      height: 100vh;
+      overflow: hidden;
+      color: white;
+    }
+    .header {
+      text-align: center;
+      margin-top: 20px;
+    }
+    .header h1 {
+      font-size: 2em;
+      color: white;
+      background-color: #ff0000;
+      padding: 10px 20px;
+      border-radius: 10px;
+      display: inline-block;
+      text-transform: uppercase;
+    }
+    .main-content {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      flex-grow: 1;
+      justify-content: center;
+    }
+    .rocket {
+      position: absolute;
+      width: 150px;
+      height: auto;
+      top: -50px;
+      right: -50px;
+    }
+    .circle {
+      width: 200px;
+      height: 200px;
+      background: radial-gradient(circle, #4a90e2, #1a3c7a);
+      border: 5px solid #ff0000;
+      border-radius: 50%;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 20px;
+      box-shadow: 0 0 20px rgba(255, 0, 0, 0.5);
+    }
+    .circle p {
+      font-size: 1.2em;
+      font-weight: bold;
+      margin: 0;
+      line-height: 1.4;
+    }
+    .circle .signal-value {
+      font-size: 2em;
+      color: #ff0000;
+    }
+    .circle span {
+      color: #ff0000;
+      font-style: italic;
+    }
+    .button-container {
+      margin-bottom: 20px;
+    }
+    .signal-button {
+      padding: 15px 30px;
+      font-size: 1.2em;
+      font-weight: bold;
+      color: white;
+      background: linear-gradient(to right, #ff0000, #ffffff);
+      border: none;
+      border-radius: 25px;
+      cursor: pointer;
+      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+      transition: transform 0.2s;
+    }
+    .signal-button:hover:not(:disabled) {
+      transform: scale(1.05);
+    }
+    .signal-button:active:not(:disabled) {
+      transform: scale(0.95);
+    }
+    .signal-button:disabled {
+      background: linear-gradient(to right, #666666, #cccccc);
+      cursor: not-allowed;
+    }
   </style>
 </head>
 <body>
-  <h1>LUCKY JET</h1>
-  <button onclick="window.Telegram.WebApp.sendData('signal')">GET SIGNAL</button>
+  <div class="header">
+    <h1>LUCKY JET</h1>
+  </div>
+
+  <div class="main-content">
+    <img src="https://example.com/luckyjet-rocket.png" alt="Lucky Jet Rocket" class="rocket">
+    <div class="circle">
+      <p id="circle-text">CLICK ON <br> <span>"GET SIGNAL"</span></p>
+    </div>
+  </div>
+
+  <div class="button-container">
+    <button id="signal-button" class="signal-button" onclick="sendSignal()">GET SIGNAL</button>
+  </div>
+
   <script src="https://telegram.org/js/telegram-web-app.js"></script>
   <script>
     window.Telegram.WebApp.ready();
+    window.Telegram.WebApp.expand();
+
+    const signalButton = document.getElementById('signal-button');
+    const circleText = document.getElementById('circle-text');
+
+    function generateSignalValue() {
+      const min = 0.8;
+      const max = 50.0;
+      const value = Math.random() * (max - min) + min;
+      return value.toFixed(1) + 'x';
+    }
+
+    function startCooldown() {
+      signalButton.disabled = true;
+      let timeLeft = 60;
+
+      const timer = setInterval(() => {
+        timeLeft--;
+        signalButton.textContent = `WAIT (${timeLeft}s)`;
+
+        if (timeLeft <= 0) {
+          clearInterval(timer);
+          signalButton.disabled = false;
+          signalButton.textContent = 'GET SIGNAL';
+          circleText.innerHTML = 'CLICK ON <br> <span>"GET SIGNAL"</span>';
+        }
+      }, 1000);
+    }
+
+    function sendSignal() {
+      const signalValue = generateSignalValue();
+      circleText.innerHTML = `<span class="signal-value">${signalValue}</span>`;
+      window.Telegram.WebApp.sendData(signalValue);
+      startCooldown();
+    }
   </script>
 </body>
 </html>
