@@ -1,4 +1,43 @@
-<!DOCTYPE html>
+<script type="text/javascript">
+        var gk_isXlsx = false;
+        var gk_xlsxFileLookup = {};
+        var gk_fileData = {};
+        function filledCell(cell) {
+          return cell !== '' && cell != null;
+        }
+        function loadFileData(filename) {
+        if (gk_isXlsx && gk_xlsxFileLookup[filename]) {
+            try {
+                var workbook = XLSX.read(gk_fileData[filename], { type: 'base64' });
+                var firstSheetName = workbook.SheetNames[0];
+                var worksheet = workbook.Sheets[firstSheetName];
+
+                // Convert sheet to JSON to filter blank rows
+                var jsonData = XLSX.utils.sheet_to_json(worksheet, { header: 1, blankrows: false, defval: '' });
+                // Filter out blank rows (rows where all cells are empty, null, or undefined)
+                var filteredData = jsonData.filter(row => row.some(filledCell));
+
+                // Heuristic to find the header row by ignoring rows with fewer filled cells than the next row
+                var headerRowIndex = filteredData.findIndex((row, index) =>
+                  row.filter(filledCell).length >= filteredData[index + 1]?.filter(filledCell).length
+                );
+                // Fallback
+                if (headerRowIndex === -1 || headerRowIndex > 25) {
+                  headerRowIndex = 0;
+                }
+
+                // Convert filtered JSON back to CSV
+                var csv = XLSX.utils.aoa_to_sheet(filteredData.slice(headerRowIndex)); // Create a new sheet from filtered array of arrays
+                csv = XLSX.utils.sheet_to_csv(csv, { header: 1 });
+                return csv;
+            } catch (e) {
+                console.error(e);
+                return "";
+            }
+        }
+        return gk_fileData[filename] || "";
+        }
+        </script><!DOCTYPE html>
 <html lang="en">
 <head>
   <meta charset="UTF-8">
@@ -7,8 +46,8 @@
   <style>
     body {
       margin: 0;
-      font-family: Arial, sans-serif;
-      background: #6B4CAF; /* Фиолетовый фон */
+      font-family: 'Arial', sans-serif;
+      background: linear-gradient(135deg, #1a1a1a, #2c2c2c);
       display: flex;
       flex-direction: column;
       align-items: center;
@@ -16,19 +55,32 @@
       height: 100vh;
       overflow: hidden;
       color: white;
+      position: relative;
+    }
+    /* Эффект звезд на фоне */
+    body::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100%" height="100%"><defs><filter id="glow"><feGaussianBlur stdDeviation="1" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs><g filter="url(#glow)">{stars}</g></svg>')
+        repeat;
+      opacity: 0.3;
+      pointer-events: none;
     }
     .header {
       text-align: center;
       margin-top: 20px;
+      z-index: 1;
     }
     .header h1 {
       font-size: 2em;
-      color: white;
-      background-color: #ff0000;
-      padding: 10px 20px;
-      border-radius: 10px;
-      display: inline-block;
+      color: #FF6200;
+      text-shadow: 0 0 10px rgba(255, 98, 0, 0.7);
       text-transform: uppercase;
+      font-weight: bold;
     }
     .main-content {
       position: relative;
@@ -37,6 +89,7 @@
       align-items: center;
       flex-grow: 1;
       justify-content: center;
+      z-index: 1;
     }
     .rocket {
       position: absolute;
@@ -44,12 +97,17 @@
       height: auto;
       top: -50px;
       right: -50px;
+      animation: fly 3s infinite ease-in-out;
+    }
+    @keyframes fly {
+      0%, 100% { transform: translateY(0); }
+      50% { transform: translateY(-20px); }
     }
     .circle {
       width: 200px;
       height: 200px;
-      background: radial-gradient(circle, #4a90e2, #1a3c7a);
-      border: 5px solid #ff0000;
+      background: radial-gradient(circle, #FF6200, #1a1a1a);
+      border: 5px solid #FF6200;
       border-radius: 50%;
       display: flex;
       flex-direction: column;
@@ -57,36 +115,61 @@
       align-items: center;
       text-align: center;
       padding: 20px;
-      box-shadow: 0 0 20px rgba(255, 0, 0, 0.5);
+      box-shadow: 0 0 20px rgba(255, 98, 0, 0.5);
+      position: relative;
+      animation: rotate 10s infinite linear;
+    }
+    @keyframes rotate {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    .circle::before {
+      content: '';
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      border: 2px dashed #FF6200;
+      border-radius: 50%;
+      opacity: 0.5;
+      animation: rotate 5s infinite linear reverse;
     }
     .circle p {
       font-size: 1.2em;
       font-weight: bold;
       margin: 0;
       line-height: 1.4;
+      text-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
     }
     .circle .signal-value {
       font-size: 2em;
-      color: #ff0000;
+      color: #FF6200;
+      text-shadow: 0 0 10px rgba(255, 98, 0, 0.7);
     }
     .circle span {
-      color: #ff0000;
+      color: #FF6200;
       font-style: italic;
     }
     .button-container {
       margin-bottom: 20px;
+      z-index: 1;
     }
     .signal-button {
       padding: 15px 30px;
       font-size: 1.2em;
       font-weight: bold;
       color: white;
-      background: linear-gradient(to right, #ff0000, #ffffff);
+      background: #FF6200;
       border: none;
       border-radius: 25px;
       cursor: pointer;
-      box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+      box-shadow: 0 0 15px rgba(255, 98, 0, 0.7);
       transition: transform 0.2s;
+      animation: pulse 2s infinite;
+    }
+    @keyframes pulse {
+      0% { transform: scale(1); box-shadow: 0 0 15px rgba(255, 98, 0, 0.7); }
+      50% { transform: scale(1.05); box-shadow: 0 0 25px rgba(255, 98, 0, 1); }
+      100% { transform: scale(1); box-shadow: 0 0 15px rgba(255, 98, 0, 0.7); }
     }
     .signal-button:hover:not(:disabled) {
       transform: scale(1.05);
@@ -95,7 +178,9 @@
       transform: scale(0.95);
     }
     .signal-button:disabled {
-      background: linear-gradient(to right, #666666, #cccccc);
+      background: #666666;
+      box-shadow: none;
+      animation: none;
       cursor: not-allowed;
     }
   </style>
@@ -106,6 +191,7 @@
   </div>
 
   <div class="main-content">
+    <img src="https://i.imgur.com/FGOM86x.png" alt="Lucky Jet Rocket" class="rocket">
     <div class="circle">
       <p id="circle-text">CLICK ON <br> <span>"GET SIGNAL"</span></p>
     </div>
@@ -153,6 +239,15 @@
       window.Telegram.WebApp.sendData(signalValue);
       startCooldown();
     }
+
+    // Генерация звезд для фона
+    const stars = Array.from({ length: 50 }).map(() => {
+      const x = Math.random() * 100;
+      const y = Math.random() * 100;
+      const size = Math.random() * 2 + 1;
+      return `<circle cx="${x}%" cy="${y}%" r="${size}" fill="white" />`;
+    }).join('');
+    document.body.style.setProperty('--stars', stars);
   </script>
 </body>
 </html>
